@@ -2,7 +2,7 @@ import { prisma } from "../prisma/prisma.js";
 
 export const getItemsByType = async (req, res) => {
   try {
-    const { type } = req.query;
+    const { type, sort } = req.query;
     if (!type) {
       return res.status(400).json({ message: "Type is required" });
     }
@@ -10,6 +10,18 @@ export const getItemsByType = async (req, res) => {
       where: {
         type,
       },
+      select: {
+        id: true,
+        type: true,
+        image: true,
+        outfits: {
+          select: {
+            id: true,
+            log: true,
+          },
+        },
+      },
+      orderBy: sort ? { usage: sort } : { createdAt: "desc" },
     });
     return res.status(200).json(clothes);
   } catch (error) {
@@ -58,14 +70,19 @@ export const deleteItem = async (req, res) => {
 export const editItem = async (req, res) => {
   try {
     const { id } = req.params;
+    const { usage, ...otherData } = req.body;
+
+    const updatedData = {
+      ...otherData,
+      usage: usage !== undefined ? Number(usage) : undefined,
+      ...(req.file && { image: req.file.filename }),
+    };
+
     const item = await prisma.item.update({
       where: {
         id,
       },
-      data: {
-        ...req.body,
-        image: req?.file?.filename,
-      },
+      data: updatedData,
     });
     return res.status(200).json(item);
   } catch (error) {
