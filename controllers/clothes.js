@@ -1,3 +1,4 @@
+import { imageUpload } from "../lib/uploadImage.js";
 import { prisma } from "../prisma/prisma.js";
 
 export const getItemsByType = async (req, res) => {
@@ -14,6 +15,7 @@ export const getItemsByType = async (req, res) => {
         id: true,
         type: true,
         image: true,
+        datePurchased: true,
         outfits: {
           select: {
             id: true,
@@ -35,13 +37,14 @@ export const addItem = async (req, res) => {
     if (!brand || !type || !datePurchased || !colour || !req?.file?.filename) {
       return res.status(400).json({ message: "All fields are required" });
     }
+    const url = await imageUpload(req.file.path);
     const item = await prisma.item.create({
       data: {
         brand,
         colour,
         datePurchased,
         type,
-        image: req.file.filename,
+        image: url,
       },
     });
     return res.status(200).json(item);
@@ -75,8 +78,11 @@ export const editItem = async (req, res) => {
     const updatedData = {
       ...otherData,
       usage: usage !== undefined ? Number(usage) : undefined,
-      ...(req.file && { image: req.file.filename }),
     };
+    if (req.file) {
+      const url = await imageUpload(req.file.path);
+      updatedData.image = url;
+    }
 
     const item = await prisma.item.update({
       where: {

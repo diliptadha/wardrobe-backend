@@ -29,9 +29,6 @@ const storage = multer.diskStorage({
       .join("");
     cb(null, `${bn}-${randomName}${extension}`);
   },
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
 });
 
 const upload = multer({ storage: storage });
