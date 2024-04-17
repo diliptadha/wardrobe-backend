@@ -17,7 +17,7 @@ export const addOutfits = async (req, res) => {
 
 export const getAllOutfit = async (req, res) => {
   try {
-    const outfit = await prisma.outfit.findMany({
+    const outfits = await prisma.outfit.findMany({
       select: {
         id: true,
         log: true,
@@ -29,7 +29,17 @@ export const getAllOutfit = async (req, res) => {
         },
       },
     });
-    return res.status(200).json(outfit);
+    const transformedData = outfits.map((outfit) => {
+      const { id, log, items } = outfit;
+      let transformedItems = {};
+      items.forEach((item) => {
+        transformedItems[item.type.toLowerCase()] = item.image;
+      });
+
+      return { id, log, ...transformedItems };
+    });
+
+    return res.status(200).json(transformedData);
   } catch (error) {
     return res.status(500).json({ message: error.message, ...error });
   }
@@ -78,8 +88,9 @@ export const editOutfit = async (req, res) => {
       },
       data: {
         log,
+        itemsIds,
         items: {
-          connect: itemsIds.map((id) => ({ id })),
+          connect: req.body.itemIds.map((itemId) => ({ id: itemId })),
         },
       },
     });

@@ -11,18 +11,6 @@ export const getItemsByType = async (req, res) => {
       where: {
         type,
       },
-      select: {
-        id: true,
-        type: true,
-        image: true,
-        datePurchased: true,
-        outfits: {
-          select: {
-            id: true,
-            log: true,
-          },
-        },
-      },
       orderBy: sort ? { usage: sort } : { createdAt: "desc" },
     });
     return res.status(200).json(clothes);
