@@ -1,18 +1,24 @@
 import { imageUpload } from "../lib/uploadImage.js";
 import { prisma } from "../prisma/prisma.js";
 
-export const getItemsByType = async (req, res) => {
+export const getItems = async (req, res) => {
   try {
     const { type, sort } = req.query;
-    if (!type) {
-      return res.status(400).json({ message: "Type is required" });
+    let filterOptions = {};
+
+    if (type) {
+      filterOptions = {
+        where: {
+          type: type.toUpperCase(), // Assuming type values are stored in uppercase in your database
+        },
+      };
     }
+
     const clothes = await prisma.item.findMany({
-      where: {
-        type,
-      },
+      ...filterOptions,
       orderBy: sort ? { usage: sort } : { createdAt: "desc" },
     });
+
     return res.status(200).json(clothes);
   } catch (error) {
     return res.status(500).json({ message: error.message, ...error });

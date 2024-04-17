@@ -5,10 +5,10 @@ import cors from "cors";
 import express from "express";
 import { editUser, login, register } from "./controllers/auth.js";
 import {
-  getItemsByType,
   addItem,
   deleteItem,
   editItem,
+  getItems,
 } from "./controllers/clothes.js";
 import multer from "multer";
 import { basename, extname } from "path";
@@ -49,7 +49,7 @@ app.get("/", (_req, res) => {
 app.post("/register", register);
 app.post("/login", login);
 app.put("/edit/user/:id", editUser);
-app.get("/item", getItemsByType);
+app.get("/item", getItems);
 app.post("/item", upload.single("image"), addItem);
 app.delete("/item/:id", deleteItem);
 app.put("/item/:id", upload.single("image"), editItem);
