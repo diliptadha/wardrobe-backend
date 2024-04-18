@@ -7,6 +7,7 @@ export const addOutfits = async (req, res) => {
         items: {
           connect: req.body.itemIds.map((itemId) => ({ id: itemId })),
         },
+        userId: req.body.userId,
       },
     });
     return res.status(200).json(updatedOutfit);
@@ -18,6 +19,7 @@ export const addOutfits = async (req, res) => {
 export const getAllOutfit = async (req, res) => {
   try {
     const outfits = await prisma.outfit.findMany({
+      where: { userId: req.userId },
       select: {
         id: true,
         log: true,

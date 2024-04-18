@@ -4,12 +4,26 @@ import { prisma } from "../prisma/prisma.js";
 export const getItems = async (req, res) => {
   try {
     const { type, sort } = req.query;
-    let filterOptions = {};
+    let filterOptions = {
+      where: {
+        userId: req.userId,
+      },
+    };
 
     if (type) {
       filterOptions = {
         where: {
-          type: type.toUpperCase(), // Assuming type values are stored in uppercase in your database
+          AND: [
+            {
+              type: type.toUpperCase(),
+              // Assuming type values are stored in uppercase in your database
+            },
+            {
+              userId: req.userId,
+            },
+          ],
+          // type: type.toUpperCase(),
+          // Assuming type values are stored in uppercase in your database
         },
       };
     }
@@ -39,6 +53,7 @@ export const addItem = async (req, res) => {
         datePurchased,
         type,
         image: url,
+        userId: req.body.userId,
       },
     });
     return res.status(200).json(item);

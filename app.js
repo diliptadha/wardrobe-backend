@@ -18,6 +18,7 @@ import {
   editOutfit,
   getAllOutfit,
 } from "./controllers/outfits.js";
+import { requireAuth } from "./middleware/auth.js";
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {
@@ -49,12 +50,12 @@ app.get("/", (_req, res) => {
 app.post("/register", register);
 app.post("/login", login);
 app.put("/edit/user/:id", editUser);
-app.get("/item", getItems);
+app.get("/item", requireAuth, getItems);
 app.post("/item", upload.single("image"), addItem);
 app.delete("/item/:id", deleteItem);
 app.put("/item/:id", upload.single("image"), editItem);
 app.post("/outfits", addOutfits);
-app.get("/outfits", getAllOutfit);
+app.get("/outfits", requireAuth, getAllOutfit);
 app.delete("/outfits/:id", deleteOutfit);
 app.put("/outfits/:id", editOutfit);
 
