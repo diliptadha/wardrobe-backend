@@ -14,6 +14,7 @@ import multer from "multer";
 import { basename, extname } from "path";
 import {
   addOutfits,
+  checkFutureDateOutfit,
   deleteOutfit,
   editOutfit,
   getAllOutfit,
@@ -58,6 +59,7 @@ app.post("/outfits", addOutfits);
 app.get("/outfits", requireAuth, getAllOutfit);
 app.delete("/outfits/:id", deleteOutfit);
 app.put("/outfits/:id", editOutfit);
+app.get("/getFutureOutfit", requireAuth, checkFutureDateOutfit);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

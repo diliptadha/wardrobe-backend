@@ -88,20 +88,57 @@ export const deleteOutfit = async (req, res) => {
 export const editOutfit = async (req, res) => {
   try {
     const { id } = req.params;
-    const { log, logDate } = req.body;
-    if (!log || !logDate) {
-      return res.status(400).json({ message: "log and logDate are required" });
+    const { log, logDate, futureDate } = req.body;
+    const data = {};
+
+    // Check if log is provided and add it to the data object
+    if (log) {
+      data.log = log;
     }
+
+    // Check if logDate is provided and add it to the data object
+    if (logDate) {
+      data.logDate = logDate;
+    }
+
+    // Check if futureDate is provided and add it to the data object
+    if (futureDate) {
+      data.futureDate = futureDate;
+    }
+
     const updatedOutfit = await prisma.outfit.update({
       where: {
         id,
       },
-      data: {
-        log,
-        logDate,
-      },
+      data,
     });
     return res.status(200).json(updatedOutfit);
+  } catch (error) {
+    return res.status(500).json({ message: error.message, ...error });
+  }
+};
+
+export const checkFutureDateOutfit = async (req, res) => {
+  try {
+    const { date } = req.body;
+    if (!date) {
+      return res.status(400).json({ message: "date is required" });
+    }
+    const checkOutfit = await prisma.outfit.findMany({
+      where: {
+        AND: [
+          {
+            futureDate: {
+              gte: date,
+            },
+          },
+          {
+            userId: req.userId,
+          },
+        ],
+      },
+    });
+    return res.status(200).json(checkOutfit);
   } catch (error) {
     return res.status(500).json({ message: error.message, ...error });
   }
