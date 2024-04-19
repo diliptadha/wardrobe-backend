@@ -29,6 +29,7 @@ export const getAllOutfit = async (req, res) => {
       select: {
         id: true,
         log: true,
+        logDate: true,
         items: {
           select: {
             type: true,
@@ -87,9 +88,9 @@ export const deleteOutfit = async (req, res) => {
 export const editOutfit = async (req, res) => {
   try {
     const { id } = req.params;
-    const { log, itemsIds } = req.body;
-    if (!id) {
-      return res.status(400).json({ message: "Id is required" });
+    const { log, logDate } = req.body;
+    if (!log || !logDate) {
+      return res.status(400).json({ message: "log and logDate are required" });
     }
     const updatedOutfit = await prisma.outfit.update({
       where: {
@@ -97,10 +98,7 @@ export const editOutfit = async (req, res) => {
       },
       data: {
         log,
-        itemsIds,
-        items: {
-          connect: req.body.itemIds.map((itemId) => ({ id: itemId })),
-        },
+        logDate,
       },
     });
     return res.status(200).json(updatedOutfit);
