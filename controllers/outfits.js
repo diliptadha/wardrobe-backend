@@ -40,13 +40,13 @@ export const getAllOutfit = async (req, res) => {
       orderBy: { createdAt: "desc" },
     });
     const transformedData = outfits.map((outfit) => {
-      const { id, log, items } = outfit;
+      const { id, log, items, logDate } = outfit;
       let transformedItems = {};
       items.forEach((item) => {
         transformedItems[item.type.toLowerCase()] = item.image;
       });
 
-      return { id, log, ...transformedItems };
+      return { id, log, logDate, ...transformedItems };
     });
 
     return res.status(200).json(transformedData);

@@ -43,8 +43,8 @@ model Outfit {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt()
   log        Boolean   @default(false)
-  logDate    DateTime?
-  futureDate DateTime?
+  logDate    DateTime? @default(now()) @db.Date
+  futureDate DateTime? @db.Date
   itemsIds   String[]  @db.ObjectId
   items      Item[]    @relation(fields: [itemsIds], references: [id])
   User       User?     @relation(fields: [userId], references: [id])
