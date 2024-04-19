@@ -35,6 +35,8 @@ export const login = async (req, res) => {
       res.status(401).json({ message: "Invalid credentials" });
     } else if (!bcrypt.compareSync(password, user.password)) {
       res.status(401).json({ message: "Invalid credentials" });
+    } else if (!user.verified) {
+      res.status(401).json({ message: "not verified" });
     } else {
       res.status(200).json(user);
     }
