@@ -130,8 +130,8 @@ export const editOutfit = async (req, res) => {
 
 export const checkFutureDateOutfit = async (req, res) => {
   try {
-    const { date } = req.body;
-    if (!date) {
+    const { currentDate } = req.query;
+    if (!currentDate) {
       return res.status(400).json({ message: "date is required" });
     }
     const checkOutfit = await prisma.outfit.findMany({
@@ -139,7 +139,7 @@ export const checkFutureDateOutfit = async (req, res) => {
         AND: [
           {
             futureDate: {
-              gte: date,
+              gte: currentDate,
             },
           },
           {
@@ -151,11 +151,14 @@ export const checkFutureDateOutfit = async (req, res) => {
 
     const fdate = checkOutfit[0]?.futureDate;
     const date1 = new Date(fdate);
-    const date2 = new Date(date);
+    const date2 = new Date(currentDate);
 
     const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime());
-    const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
+    let diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
+    if (isNaN(diffInDays)) {
+      diffInDays = 0;
+    }
     return res
       .status(200)
       .json(
