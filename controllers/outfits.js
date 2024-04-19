@@ -2,15 +2,21 @@ import { prisma } from "../prisma/prisma.js";
 
 export const addOutfits = async (req, res) => {
   try {
-    const updatedOutfit = await prisma.outfit.create({
+    const { userId, itemIds } = req.body;
+
+    // Check if userId is provided
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+    const outfit = await prisma.outfit.create({
       data: {
         items: {
-          connect: req.body.itemIds.map((itemId) => ({ id: itemId })),
+          connect: itemIds.map((itemId) => ({ id: itemId })),
         },
-        userId: req.body.userId,
+        userId,
       },
     });
-    return res.status(200).json(updatedOutfit);
+    return res.status(200).json(outfit);
   } catch (error) {
     return res.status(500).json({ message: error.message, ...error });
   }
@@ -30,6 +36,7 @@ export const getAllOutfit = async (req, res) => {
           },
         },
       },
+      orderBy: { createdAt: "desc" },
     });
     const transformedData = outfits.map((outfit) => {
       const { id, log, items } = outfit;

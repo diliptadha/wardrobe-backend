@@ -3,7 +3,7 @@ import { prisma } from "../prisma/prisma.js";
 
 export const getItems = async (req, res) => {
   try {
-    const { type, sort } = req.query;
+    const { type, usage } = req.query;
     let filterOptions = {
       where: {
         userId: req.userId,
@@ -16,21 +16,18 @@ export const getItems = async (req, res) => {
           AND: [
             {
               type: type.toUpperCase(),
-              // Assuming type values are stored in uppercase in your database
             },
             {
               userId: req.userId,
             },
           ],
-          // type: type.toUpperCase(),
-          // Assuming type values are stored in uppercase in your database
         },
       };
     }
 
     const clothes = await prisma.item.findMany({
       ...filterOptions,
-      orderBy: sort ? { usage: sort } : { createdAt: "desc" },
+      orderBy: usage ? { usage } : { datePurchased: "desc" },
     });
 
     return res.status(200).json(clothes);
@@ -51,7 +48,7 @@ export const addItem = async (req, res) => {
         brand,
         colour,
         datePurchased,
-        type,
+        type: type.toUpperCase(),
         image: url,
         userId: req.body.userId,
       },
