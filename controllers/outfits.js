@@ -24,15 +24,18 @@ export const addOutfits = async (req, res) => {
 
 export const getAllOutfit = async (req, res) => {
   try {
-    const { logOutfitData } = req.body;
+    const { logOutfitData } = req.query;
     let orderBy = {};
-    if (logOutfitData) {
+    let where = {};
+    if (logOutfitData === "true") {
+      where = { AND: [{ userId: req.userId }, { log: true }] };
       orderBy = { logDate: "asc" };
     } else {
+      where = { userId: req.userId };
       orderBy = { createdAt: "desc" };
     }
     const outfits = await prisma.outfit.findMany({
-      where: { userId: req.userId },
+      where,
       select: {
         id: true,
         log: true,
