@@ -138,7 +138,7 @@ export const checkFutureDateOutfit = async (req, res) => {
       where: {
         AND: [
           {
-            futureDate: {
+            logDate: {
               gte: currentDate,
             },
           },
@@ -147,9 +147,10 @@ export const checkFutureDateOutfit = async (req, res) => {
           },
         ],
       },
+      orderBy: { logDate: "asc" },
     });
 
-    const fdate = checkOutfit[0]?.futureDate;
+    const fdate = checkOutfit[0]?.logDate;
     const date1 = new Date(fdate);
     const date2 = new Date(currentDate);
 
@@ -158,6 +159,7 @@ export const checkFutureDateOutfit = async (req, res) => {
 
     if (isNaN(diffInDays)) {
       diffInDays = 0;
+      return res.status(200).json("");
     }
     return res
       .status(200)
