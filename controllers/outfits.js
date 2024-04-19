@@ -24,6 +24,13 @@ export const addOutfits = async (req, res) => {
 
 export const getAllOutfit = async (req, res) => {
   try {
+    const { logOutfitData } = req.body;
+    let orderBy = {};
+    if (logOutfitData) {
+      orderBy = { logDate: "asc" };
+    } else {
+      orderBy = { createdAt: "desc" };
+    }
     const outfits = await prisma.outfit.findMany({
       where: { userId: req.userId },
       select: {
@@ -37,7 +44,7 @@ export const getAllOutfit = async (req, res) => {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
     const transformedData = outfits.map((outfit) => {
       const { id, log, items, logDate } = outfit;
@@ -138,7 +145,19 @@ export const checkFutureDateOutfit = async (req, res) => {
         ],
       },
     });
-    return res.status(200).json(checkOutfit);
+
+    const fdate = checkOutfit[0]?.futureDate;
+    const date1 = new Date(fdate);
+    const date2 = new Date(date);
+
+    const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime());
+    const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
+
+    return res
+      .status(200)
+      .json(
+        `You have an outfit planned in ${diffInDays} days. Make sure it is ready be worn.`
+      );
   } catch (error) {
     return res.status(500).json({ message: error.message, ...error });
   }
