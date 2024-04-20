@@ -36,27 +36,19 @@ export const getAllOutfit = async (req, res) => {
     }
     const outfits = await prisma.outfit.findMany({
       where,
-      select: {
-        id: true,
-        log: true,
-        logDate: true,
-        items: {
-          select: {
-            type: true,
-            image: true,
-          },
-        },
+      include: {
+        items: true,
       },
       orderBy,
     });
     const transformedData = outfits.map((outfit) => {
-      const { id, log, items, logDate } = outfit;
+      const { id, log, items, logDate, userId } = outfit;
       let transformedItems = {};
       items.forEach((item) => {
         transformedItems[item.type.toLowerCase()] = item.image;
       });
 
-      return { id, log, logDate, ...transformedItems };
+      return { id, log, logDate, userId, ...transformedItems };
     });
 
     return res.status(200).json(transformedData);
@@ -98,7 +90,7 @@ export const deleteOutfit = async (req, res) => {
 export const editOutfit = async (req, res) => {
   try {
     const { id } = req.params;
-    const { log, logDate, futureDate } = req.body;
+    const { log, logDate } = req.body;
     const data = {};
 
     // Check if log is provided and add it to the data object
@@ -111,10 +103,28 @@ export const editOutfit = async (req, res) => {
       data.logDate = logDate;
     }
 
-    // Check if futureDate is provided and add it to the data object
-    if (futureDate) {
-      data.futureDate = futureDate;
-    }
+    const outfit = await prisma.outfit.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    // Update the usage field for each item associated with the outfit
+    await Promise.all(
+      outfit.items.map(async (item) => {
+        return await prisma.item.update({
+          where: {
+            id: item.id,
+          },
+          data: {
+            usage: item.usage + 1,
+          },
+        });
+      })
+    );
 
     const updatedOutfit = await prisma.outfit.update({
       where: {
