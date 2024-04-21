@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "npx prisma generate && nodemon app.js --ignore /uploads/",
+    "dev": "npx prisma generate && nodemon app.js",
     "start": "npx prisma generate && node app.js"
   },
   "keywords": [],

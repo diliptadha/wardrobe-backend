@@ -45,7 +45,10 @@ export const getAllOutfit = async (req, res) => {
       const { id, log, items, logDate, userId } = outfit;
       let transformedItems = {};
       items.forEach((item) => {
-        transformedItems[item.type.toLowerCase()] = item.image;
+        transformedItems[item.type.toLowerCase()] = {
+          image: item.image,
+          isDeleted: item.isDeleted,
+        };
       });
 
       return { id, log, logDate, userId, ...transformedItems };
@@ -93,12 +96,7 @@ export const editOutfit = async (req, res) => {
     const { log, logDate } = req.body;
     const data = {};
 
-    // Check if log is provided and add it to the data object
-    if (log) {
-      data.log = log;
-    }
-
-    // Check if logDate is provided and add it to the data object
+    data.log = log;
     if (logDate) {
       data.logDate = logDate;
     }

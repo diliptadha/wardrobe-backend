@@ -38,8 +38,15 @@ export const getItems = async (req, res) => {
 
 export const addItem = async (req, res) => {
   try {
-    const { brand, type, colour, datePurchased } = req.body;
-    if (!brand || !type || !datePurchased || !colour || !req?.file?.filename) {
+    const { brand, type, colour, datePurchased, userId } = req.body;
+    if (
+      !brand ||
+      !type ||
+      !datePurchased ||
+      !colour ||
+      !userId ||
+      !req?.file?.filename
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
     const url = await imageUpload(req.file.path);
@@ -50,7 +57,11 @@ export const addItem = async (req, res) => {
         datePurchased,
         type: type.toUpperCase(),
         image: url,
-        userId: req.body.userId,
+        User: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
     return res.status(200).json(item);
@@ -65,9 +76,12 @@ export const deleteItem = async (req, res) => {
     if (!id) {
       return res.status(400).json({ message: "Id is required" });
     }
-    const item = await prisma.item.delete({
+    const item = await prisma.item.update({
       where: {
         id,
+      },
+      data: {
+        isDeleted: true,
       },
     });
     return res.status(200).json(item);
