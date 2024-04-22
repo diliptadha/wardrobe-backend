@@ -34,13 +34,27 @@ export const getAllOutfit = async (req, res) => {
       where = { userId: req.userId };
       orderBy = { createdAt: "desc" };
     }
-    const outfits = await prisma.outfit.findMany({
+
+    let outfits = await prisma.outfit.findMany({
       where,
       include: {
         items: true,
       },
       orderBy,
     });
+
+    if (logOutfitData === "true") {
+      outfits = outfits.flatMap((item) =>
+        item.logDate.map((date) => ({
+          id: item.id,
+          log: item.log,
+          logDate: date,
+          userId: item.userId,
+          items: item.items,
+        }))
+      );
+    }
+
     const transformedData = outfits.map((outfit) => {
       const { id, log, items, logDate, userId } = outfit;
       let transformedItems = {};
@@ -95,20 +109,22 @@ export const editOutfit = async (req, res) => {
     const { id } = req.params;
     const { log, logDate } = req.body;
     const data = {};
-
     data.log = log;
-    if (logDate) {
-      data.logDate = logDate;
-    }
 
     const outfit = await prisma.outfit.findUnique({
       where: {
         id,
       },
-      include: {
+      select: {
         items: true,
+        logDate: true,
       },
     });
+
+    if (logDate) {
+      const combinedArray = [...outfit.logDate, ...logDate];
+      data.logDate = combinedArray;
+    }
 
     // Update the usage field for each item associated with the outfit
     await Promise.all(
