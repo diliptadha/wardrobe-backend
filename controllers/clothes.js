@@ -1,4 +1,4 @@
-import { imageUpload } from "../lib/uploadImage.js";
+import { imageUpload } from "../utils/uploadImage.js";
 import { prisma } from "../prisma/prisma.js";
 
 export const getItems = async (req, res) => {
