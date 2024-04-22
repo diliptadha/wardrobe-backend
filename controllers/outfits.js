@@ -29,7 +29,6 @@ export const getAllOutfit = async (req, res) => {
     let where = {};
     if (logOutfitData === "true") {
       where = { AND: [{ userId: req.userId }, { log: true }] };
-      orderBy = { logDate: "asc" };
     } else {
       where = { userId: req.userId };
       orderBy = { createdAt: "desc" };
@@ -44,15 +43,17 @@ export const getAllOutfit = async (req, res) => {
     });
 
     if (logOutfitData === "true") {
-      outfits = outfits.flatMap((item) =>
-        item.logDate.map((date) => ({
-          id: item.id,
-          log: item.log,
-          logDate: date,
-          userId: item.userId,
-          items: item.items,
-        }))
-      );
+      outfits = outfits
+        .flatMap((item) =>
+          item.logDate.map((date) => ({
+            id: item.id,
+            log: item.log,
+            logDate: date,
+            userId: item.userId,
+            items: item.items,
+          }))
+        )
+        .sort((a, b) => a.logDate - b.logDate);
     }
 
     const transformedData = outfits.map((outfit) => {
@@ -158,23 +159,25 @@ export const checkFutureDateOutfit = async (req, res) => {
     if (!currentDate) {
       return res.status(400).json({ message: "date is required" });
     }
-    const checkOutfit = await prisma.outfit.findMany({
-      where: {
-        AND: [
-          {
-            logDate: {
-              gte: currentDate,
-            },
-          },
-          {
-            userId: req.userId,
-          },
-        ],
-      },
-      orderBy: { logDate: "asc" },
+
+    const loggedOutfits = await prisma.outfit.findMany({
+      where: { AND: [{ userId: req.userId }, { log: true }] },
+      include: { items: true },
     });
 
-    const fdate = checkOutfit[0]?.logDate;
+    const allOutfits = loggedOutfits
+      .flatMap((outfit) =>
+        outfit.logDate.map((date) => ({
+          id: outfit.id,
+          log: outfit.log,
+          logDate: date,
+          userId: outfit.userId,
+          items: outfit.items,
+        }))
+      )
+      .sort((a, b) => a.logDate - b.logDate);
+
+    const fdate = allOutfits[0]?.logDate;
     const date1 = new Date(fdate);
     const date2 = new Date(currentDate);
 
