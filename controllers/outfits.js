@@ -1,5 +1,4 @@
 import { prisma } from "../prisma/prisma.js";
-import { compareNearestFutureDate } from "../utils/dateCompare.js";
 
 export const addOutfits = async (req, res) => {
   try {
@@ -166,13 +165,18 @@ export const checkFutureDateOutfit = async (req, res) => {
       include: { items: true },
     });
 
-    const allDates = loggedOutfits.flatMap((outfit) =>
-      outfit.logDate.map((date) => date)
-    );
-    console.log(allDates);
+    const allDates = loggedOutfits
+      .flatMap((outfit) => outfit.logDate.map((date) => date))
+      .sort((a, b) => b - a);
 
-    const fdate = allDates.sort(compareNearestFutureDate)[0];
-    const date1 = new Date(fdate);
+    let closest = Infinity;
+    allDates.forEach(function (d) {
+      if (d > new Date(currentDate) && d < closest) {
+        closest = d;
+      }
+    });
+
+    const date1 = new Date(closest);
     const date2 = new Date(currentDate);
 
     const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime());

@@ -14,7 +14,7 @@ export const register = async (req, res) => {
         password: await bcrypt.hash(password, 10),
       },
     });
-    res.status(200).json(user);
+    res.status(200).json({ message: "You have been registered!", user });
   } catch (error) {
     if (error.code === "P2002") {
       res.status(409).json({
