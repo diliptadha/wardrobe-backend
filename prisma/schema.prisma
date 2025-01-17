@@ -12,7 +12,7 @@ model User {
   name     String
   email    String  @unique
   password String
-  verified Boolean @default(false)
+  verified Boolean @default(true)
 
   outfits   Outfit[]
   items     Item[]
